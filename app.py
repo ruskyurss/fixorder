@@ -79,7 +79,7 @@ def procesar_pdf(file_input):
     return doc.tobytes()
 
 # --- INTERFAZ DE USUARIO (STREAMLIT) ---
-st.sidebar.image("https://e7.pngegg.com/pngimages/412/689/png-clipart-xipe-totec-aztec-mythology-codex-borgia-tezcatlipoca-aztec-miscellaneous-area-thumbnail.png", width=200)
+st.sidebar.image("https://www.imghippo.com/i/feB2149iFo.png", width=200)
 st.sidebar.title("Instrucciones")
 st.sidebar.info("""
 1. Sube tus Órdenes de Compra (PDF).
