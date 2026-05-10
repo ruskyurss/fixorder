@@ -79,7 +79,7 @@ def procesar_pdf(file_input):
     return doc.tobytes()
 
 # --- INTERFAZ DE USUARIO (STREAMLIT) ---
-st.sidebar.image("https://www.imghippo.com/i/feB2149iFo.png", width=200)
+st.sidebar.image("https://user10751.na.imgto.link/public/20260510/tux11.avif", width=200)
 st.sidebar.title("Instrucciones")
 st.sidebar.info("""
 1. Sube tus Órdenes de Compra (PDF).
