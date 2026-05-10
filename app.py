@@ -3,7 +3,7 @@ import fitz
 import io
 
 # Configuración de la pestaña del navegador
-st.set_page_config(page_title="Anonimizador DSCM - Cotemar", page_icon="🛡️")
+st.set_page_config(page_title="Bicha' P. Order", page_icon="📝")
 
 def procesar_pdf(file_input):
     # Leer el archivo desde la memoria de Streamlit
@@ -79,7 +79,7 @@ def procesar_pdf(file_input):
     return doc.tobytes()
 
 # --- INTERFAZ DE USUARIO (STREAMLIT) ---
-st.sidebar.image("https://cotemar.com.mx/wp-content/uploads/2020/10/Cotemar_Logotipo.png", width=200)
+st.sidebar.image("https://e7.pngegg.com/pngimages/412/689/png-clipart-xipe-totec-aztec-mythology-codex-borgia-tezcatlipoca-aztec-miscellaneous-area-thumbnail.png", width=200)
 st.sidebar.title("Instrucciones")
 st.sidebar.info("""
 1. Sube tus Órdenes de Compra (PDF).
@@ -87,8 +87,8 @@ st.sidebar.info("""
 3. Se ocultarán los precios hasta encontrar la frase de cierre legal.
 """)
 
-st.title("🛡️ Bicha' P. Order (Versión 1.0)")
-st.subheader("División DSCM - Cotemar")
+st.title("📝 Bicha' P. Order")
+st.subheader("(Versión 1.0)")
 
 st.markdown("Carga los archivos para procesarlos")
 
