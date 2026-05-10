@@ -81,8 +81,8 @@ st.sidebar.info("""
 3. Desplegará la opción de descarga y listo!.
 """)
 
-st.title("📝 Anonimizador de O.C. V2")
-st.subheader("División DSCM - Cotemar")
+st.title("📝 Bicha' P. Order")
+st.subheader("(Versión 1.0)")
 
 uploaded_files = st.file_uploader("Arrastra aquí los archivos PDF", type="pdf", accept_multiple_files=True)
 
