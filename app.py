@@ -20,77 +20,69 @@ def procesar_pdf(file_input):
     x0_p, x1_p = pos_precio[0].x0, pos_precio[0].x1
     x0_s, x1_s = pos_subtotal[0].x0, pos_subtotal[0].x1
 
+    # Variable de control para detener el proceso en hojas posteriores
+    stop_drawing_total = False
+
     # --- PASO 2: PROCESAR TODAS LAS PÁGINAS ---
     for num_pagina, page in enumerate(doc):
         
-        # A. Determinar límite inferior (Paginado o Texto Legal de Cierre)
+        # Si ya se detectó la frase de cierre en una hoja previa, terminamos el ciclo
+        if stop_drawing_total:
+            break
+            
+        # A. Determinar límite inferior estándar (Paginado)
         y_limite_inferior = page.rect.height - 40 
-        
-        # Buscar etiquetas de paginado
         for etiqueta in ["Página", "Pagina", "Pág", "Pag"]:
             pos_paginado = page.search_for(etiqueta)
             if pos_paginado:
                 y_limite_inferior = pos_paginado[0].y0 - 5
                 break 
 
-        # Buscar frase de cierre para detener el dibujo
+        # B. DETECTAR FRASE DE CIERRE LEGAL
+        # Si aparece, actualizamos el límite de ESTA hoja y activamos el freno para las SIGUIENTES
         pos_cierre = page.search_for("EL PROVEEDOR Y COTEMAR")
         if pos_cierre:
             y_limite_inferior = pos_cierre[0].y0 - 10
+            stop_drawing_total = True # Freno activado
 
-        # B. PROCESAMIENTO SEGÚN EL TIPO DE PÁGINA
+        # C. DIBUJO DE CUADROS SEGÚN EL TIPO DE PÁGINA
         if num_pagina == 0:
-            # Página 1: Empezar debajo de los encabezados
+            # Página 1: Inicio debajo de encabezados
             y_inicio = pos_precio[0].y1 + 2
             if y_inicio < y_limite_inferior:
                 page.draw_rect(fitz.Rect(x0_p - 5, y_inicio + 5, x1_p + 5, y_limite_inferior), color=(1,1,1), fill=(1,1,1), overlay=True)
                 page.draw_rect(fitz.Rect(x0_s - 5, y_inicio + 5, x1_s + 5, y_limite_inferior), color=(1,1,1), fill=(1,1,1), overlay=True)
         else:
-            # Página 2 en adelante: Buscar INCOTERM como ancla de inicio
+            # Página 2+: Inicio debajo de INCOTERM
             pos_incoterm = page.search_for("INCOTERM")
             if pos_incoterm:
-                y_ancla_incoterm = pos_incoterm[0].y1
-                
-                # Obtener líneas vectoriales para identificar filas de materiales
+                y_ancla = pos_incoterm[0].y1
                 dibujos = page.get_drawings()
-                lineas_y = []
-                for dibujo in dibujos:
-                    for item in dibujo["items"]:
-                        if item[0] == "l": 
-                            pnt_inicio, pnt_fin = item[1], item[2]
-                            # Filtro: línea horizontal larga debajo de INCOTERM y sobre el límite de cierre
-                            if abs(pnt_inicio.y - pnt_fin.y) < 1.0 and abs(pnt_fin.x - pnt_inicio.x) > 200:
-                                if y_ancla_incoterm < pnt_inicio.y < y_limite_inferior:
-                                    lineas_y.append(pnt_inicio.y)
-                
-                lineas_y = sorted(list(set(lineas_y)))
+                lineas_y = sorted(list(set([it[1].y for d in dibujos for it in d["items"] if it[0] == "l" and abs(it[1].y - it[2].y) < 1.0 and abs(it[2].x - it[1].x) > 200 and y_ancla < it[1].y < y_limite_inferior])))
                 
                 for i in range(len(lineas_y)):
-                    y_actual = lineas_y[i]
-                    # Bloque termina en la siguiente línea o en el límite legal/paginado
-                    y_bloqueo_fin = lineas_y[i+1] - 1 if i < len(lineas_y) - 1 else y_limite_inferior
+                    y_act = lineas_y[i]
+                    y_sig = lineas_y[i+1] - 1 if i < len(lineas_y) - 1 else y_limite_inferior
                     
-                    if y_actual < y_limite_inferior:
-                        page.draw_rect(fitz.Rect(x0_p - 5, y_actual + 1.5, x1_p + 5, y_bloqueo_fin), color=(1,1,1), fill=(1,1,1), overlay=True)
-                        page.draw_rect(fitz.Rect(x0_s - 5, y_actual + 1.5, x1_s + 5, y_bloqueo_fin), color=(1,1,1), fill=(1,1,1), overlay=True)
+                    if y_act < y_limite_inferior:
+                        page.draw_rect(fitz.Rect(x0_p - 5, y_act + 1.5, x1_p + 5, y_sig), color=(1,1,1), fill=(1,1,1), overlay=True)
+                        page.draw_rect(fitz.Rect(x0_s - 5, y_act + 1.5, x1_s + 5, y_sig), color=(1,1,1), fill=(1,1,1), overlay=True)
 
-    # --- PASO 3: APLANADO Y RETORNO ---
-    doc.bake() # Fusiona los cuadros blancos con el PDF
+    # --- PASO 3: FINALIZAR ---
+    doc.bake()
     return doc.tobytes()
 
-# --- INTERFAZ DE USUARIO (STREAMLIT) ---
+# --- INTERFAZ STREAMLIT ---
 st.sidebar.image("https://user10751.na.imgto.link/public/20260510/tux11.avif", width=200)
 st.sidebar.title("Instrucciones")
 st.sidebar.info("""
-1. Sube tus Órdenes de Compra (PDF).
-2. El sistema detectará las columnas de costos y el área de firmas.
-3. Se ocultarán los precios hasta encontrar la frase de cierre legal.
+1. Sube tus PDFs de Órdenes de Compra.
+2. El sistema ocultará costos de las Ordenes de Compra'.
+3. Desplegará la opción de descarga y listo!.
 """)
 
-st.title("📝 Bicha' P. Order")
-st.subheader("(Versión 1.0)")
-
-st.markdown("Carga los archivos para procesarlos")
+st.title("📝 Anonimizador de O.C. V2")
+st.subheader("División DSCM - Cotemar")
 
 uploaded_files = st.file_uploader("Arrastra aquí los archivos PDF", type="pdf", accept_multiple_files=True)
 
@@ -112,7 +104,7 @@ if uploaded_files:
                         key=uploaded_file.name
                     )
                 else:
-                    st.error("Encabezados no detectados")
+                    st.error("Encabezados no hallados")
 
 st.markdown("---")
-st.caption("Herramienta de optimización Tótec.")
+st.caption("Herramienta de optimización 🄯 Tótec 2026.")
