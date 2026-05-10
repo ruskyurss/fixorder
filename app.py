@@ -2,6 +2,21 @@ import streamlit as st
 import fitz
 import io
 
+#  -- Eliminando Enzabezado y Footer
+import streamlit as st
+
+# Inyectar CSS para ocultar el logo de GitHub y el menú de Streamlit
+hide_github_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    .viewerBadge_container__1QSob {display: none !important;}
+    header {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_github_style, unsafe_allow_html=True)
+#  -- Eliminando Enzabezado y Footer
+
 # Configuración de la pestaña del navegador
 st.set_page_config(page_title="Bicha' P. Order", page_icon="📝")
 
